@@ -52,13 +52,3 @@
 ```
 
     
-
----
-
-![](./4-productive-time.svg)
-
-```
-![](https://raw.githubusercontent.com/naka-gawa/naka-gawa/main/profile-summary-card-output/radical/4-productive-time.svg)
-```
-
-    
