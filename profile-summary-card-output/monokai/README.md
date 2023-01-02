@@ -52,3 +52,13 @@
 ```
 
     
+
+---
+
+![](./4-productive-time.svg)
+
+```
+![](https://raw.githubusercontent.com/naka-gawa/naka-gawa/main/profile-summary-card-output/monokai/4-productive-time.svg)
+```
+
+    
