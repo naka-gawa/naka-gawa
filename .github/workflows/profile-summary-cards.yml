@@ -8,10 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: generate
+    name: generate-github-profile-summary-cards
+    permissions:
+      contents: write
 
     steps:
-      - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
+      - uses: actions/checkout@v4
       - uses: vn7n24fzkq/github-profile-summary-cards@5a2e29efb909f77ce6628e633aaacde7a60eb6eb # v0.11.3
         env:
           GITHUB_TOKEN: ${{ secrets.MY_TOKEN_SECRETS }}
