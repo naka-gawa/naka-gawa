@@ -32,6 +32,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
 
+      - uses: vn7n24fzkq/github-profile-summary-cards@release
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_TOKEN_SECRETS }}
+        with:
+          USERNAME: ${{ github.repository_owner }}
+          AUTO_PUSH: false
+          UTC_OFFSET: 9
+          THEME: "tokyonight"
+          ANIMATION: "load"
+          DURATION: "1"
+
       - name: Get current date
         run: echo "DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
 
