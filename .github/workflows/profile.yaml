@@ -32,7 +32,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
 
-      - uses: vn7n24fzkq/github-profile-summary-cards@e722eded97059b31d7e8ad3ae0267b74ff24172d
+      - uses: vn7n24fzkq/github-profile-summary-cards@v0.12.0
         env:
           GITHUB_TOKEN: ${{ secrets.MY_TOKEN_SECRETS }}
         with:
