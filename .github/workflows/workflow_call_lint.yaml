@@ -1,8 +1,7 @@
 name: lint
 
-# Reusable workflow that holds the actual CI jobs. It is called from ci.yaml.
-# Add new pull-request CI jobs here so they are covered by the aggregated
-# `status-check` required status check defined in ci.yaml.
+# Reusable workflow holding the actual CI jobs (called from ci.yaml).
+# Add new pull-request CI jobs here. Design: docs/required-status-check.md
 on:
   workflow_call:
 
@@ -10,9 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  # Job-level path filter. Replaces a workflow-level `paths:` filter so the
-  # workflow always runs (and always reports its status check) while the actual
-  # lint job only runs when workflow files change.
+  # Job-level path filter (instead of a workflow-level `paths:` filter) so the
+  # workflow always runs and always reports its status check.
   changes:
     runs-on: ubuntu-24.04
     permissions:
