@@ -101,9 +101,24 @@ register only:
 Do not register the individual jobs (`pinact`, `changes`, etc.). Adding or
 renaming jobs in the reusable workflow requires no ruleset change.
 
+## Auto-merge
+
+Both the daily contribution-stats update PR and Renovate dependency PRs are
+merged automatically. GitHub native auto-merge waits for the required
+`status-check` to pass before merging, so it only works once the required
+status check above is configured in the ruleset.
+
+- **Contribution stats update PR** (`.github/workflows/generate-profile`): the
+  workflow enables auto-merge on the PR it opens via
+  `peter-evans/enable-pull-request-automerge`.
+- **Renovate PRs** (`.github/renovate.json`): `automerge` with
+  `platformAutomerge` lets Renovate enable GitHub native auto-merge on the PRs
+  it opens.
+
 ## Files
 
 | File | Role |
 | --- | --- |
 | `.github/workflows/ci.yaml` | Pull-request entry point; defines the aggregated `status-check` job. |
 | `.github/workflows/workflow_call_lint.yaml` | Reusable workflow holding the actual CI jobs. Add new jobs here. |
+| `.github/renovate.json` | Renovate config; enables auto-merge for dependency PRs. |
