@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+# --- Required status check design -------------------------------------------
+# Only the `status-check` job below is registered as a required status check
+# in the branch ruleset. It aggregates the result of every job that runs on a
+# pull request, so the ruleset never has to be updated when a CI job is added,
+# renamed, or removed.
+#
+# IMPORTANT: Do NOT add CI jobs directly to this file. Add them to the reusable
+# workflow `.github/workflows/workflow_call_lint.yaml` instead, so they are
+# automatically covered by `status-check`. A job added here would run without
+# being blocked by the required status check.
+#
+# Path filtering is done at the job level (dorny/paths-filter) inside the
+# reusable workflow rather than with a workflow-level `paths:` filter. A
+# workflow skipped by a `paths:` filter never reports its required status
+# check, which permanently blocks merges (e.g. the daily automated profile
+# update PRs, which do not touch `.github/**`).
+#
+# Reference:
+# https://zenn.dev/shunsuke_suzuki/articles/how-to-manage-github-actions-required-status-check
+# ---------------------------------------------------------------------------
+
+permissions: {}
+
+jobs:
+  lint:
+    uses: ./.github/workflows/workflow_call_lint.yaml
+    permissions:
+      contents: write
+      pull-requests: write
+    secrets: inherit
+
+  # The single required status check. Register ONLY this job in the ruleset.
+  status-check:
+    runs-on: ubuntu-24.04
+    needs: [lint]
+    # Fail only when a needed job failed or was cancelled. When every needed
+    # job succeeded (or was skipped) this job is itself skipped, and GitHub
+    # treats a skipped required status check as passing.
+    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    steps:
+      - run: exit 1

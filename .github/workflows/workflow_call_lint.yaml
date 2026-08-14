@@ -1,0 +1,51 @@
+name: lint
+
+# Reusable workflow that holds the actual CI jobs. It is called from ci.yaml.
+# Add new pull-request CI jobs here so they are covered by the aggregated
+# `status-check` required status check defined in ci.yaml.
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  # Job-level path filter. Replaces a workflow-level `paths:` filter so the
+  # workflow always runs (and always reports its status check) while the actual
+  # lint job only runs when workflow files change.
+  changes:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      workflows: ${{ steps.filter.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
+        id: filter
+        with:
+          filters: |
+            workflows:
+              - '.github/**/*.yml'
+              - '.github/**/*.yaml'
+
+  pinact:
+    needs: [changes]
+    if: needs.changes.outputs.workflows == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: suzuki-shunsuke/pinact-action@896d595f299e71d65b9d28349d6956abe144390a # v3.0.0
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
