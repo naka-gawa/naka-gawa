@@ -113,7 +113,8 @@ status check above is configured in the ruleset.
   `peter-evans/enable-pull-request-automerge`.
 - **Renovate PRs** (`.github/renovate.json`): `automerge` with
   `platformAutomerge` lets Renovate enable GitHub native auto-merge on the PRs
-  it opens.
+  it opens. Major updates are excluded (`matchUpdateTypes: ["major"]`,
+  `automerge: false`) so they are merged manually after review.
 
 ## Files
 
