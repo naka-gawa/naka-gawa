@@ -5,6 +5,7 @@
     "helpers:pinGitHubActionDigests"
   ],
   "labels": ["dependencies"],
+  "minimumReleaseAge": "14 days",
   "automerge": true,
   "platformAutomerge": true,
   "packageRules": [

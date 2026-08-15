@@ -22,7 +22,7 @@ jobs:
   # The single required status check. Register ONLY this job in the ruleset.
   # Skipped (= passing) when all needed jobs succeed; fails when any fail.
   status-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [lint]
     if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
     steps:

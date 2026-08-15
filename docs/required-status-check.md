@@ -33,7 +33,7 @@ succeeds only when all of them succeed:
 
 ```yaml
 status-check:
-  runs-on: ubuntu-24.04
+  runs-on: ubuntu-latest
   needs: [lint]
   if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
   steps:

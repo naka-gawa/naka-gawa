@@ -1,0 +1,4 @@
+# Path filters consumed by dorny/paths-filter in workflow_call_lint.yaml.
+workflows:
+  - '.github/**/*.yml'
+  - '.github/**/*.yaml'

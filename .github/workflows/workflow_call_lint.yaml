@@ -12,7 +12,7 @@ jobs:
   # Job-level path filter (instead of a workflow-level `paths:` filter) so the
   # workflow always runs and always reports its status check.
   changes:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
@@ -26,10 +26,7 @@ jobs:
       - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
         id: filter
         with:
-          filters: |
-            workflows:
-              - '.github/**/*.yml'
-              - '.github/**/*.yaml'
+          filters: .github/paths-filter.yaml
 
   pinact:
     needs: [changes]
