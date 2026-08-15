@@ -1,15 +1,16 @@
-name: Approve Renovate PR
+name: Approve automated PRs
 
-# Auto-approves non-major Renovate PRs as the code owner so the required
-# code-owner review (.github/CODEOWNERS) is satisfied and auto-merge can proceed.
+# Auto-approves automated (bot) PRs as the code owner so the required code-owner
+# review (.github/CODEOWNERS) is satisfied and auto-merge can proceed.
 #
 # This is the CLIENT half of the csm-actions/approve-pr-action Client/Server
-# model. It does NOT hold the approving token: it only asks the server
-# repository (approve-pr-server) to approve, and the server validates the PR and
-# approves it with the code owner's PAT which lives only in that server repo.
+# model: it never holds the approving token. It asks the server repository
+# (approve-pr-server) to approve, and the server validates the PR and approves
+# it with the code owner's PAT, which lives only in that server repo.
 #
-# Major updates are excluded (they carry the `major-update` label set in
-# .github/renovate.json) so they keep requiring a manual review.
+# WHO gets approved is decided by `allowed_committers` (the server also requires
+# every commit to be signed and linked to a GitHub user). Add a committer there
+# to cover more automated PRs (e.g. the daily profile-update PR).
 #
 # Requires in this repository:
 #   - vars.APPROVE_PR_CLIENT_APP_ID       (client GitHub App, issues:write on the server repo)
@@ -30,9 +31,7 @@ permissions:
 
 jobs:
   approve:
-    if: >-
-      github.event.pull_request.user.login == 'renovate[bot]' &&
-      !contains(github.event.pull_request.labels.*.name, 'major-update')
+    if: github.event.pull_request.user.type == 'Bot'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -42,3 +41,6 @@ jobs:
           app_id: ${{ vars.APPROVE_PR_CLIENT_APP_ID }}
           app_private_key: ${{ secrets.APPROVE_PR_CLIENT_PRIVATE_KEY }}
           server_repository_name: approve-pr-server
+          allowed_committers: |
+            renovate[bot]
+            dependabot[bot]
