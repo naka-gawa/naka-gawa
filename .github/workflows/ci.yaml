@@ -20,10 +20,13 @@ jobs:
     secrets: inherit
 
   # The single required status check. Register ONLY this job in the ruleset.
-  # Skipped (= passing) when all needed jobs succeed; fails when any fail.
+  # Always runs so it reports an explicit success (green); fails only when a
+  # needed job failed or was cancelled.
   status-check:
     runs-on: ubuntu-latest
     needs: [lint]
-    if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    if: always()
     steps:
-      - run: exit 1
+      - name: Fail if any needed job did not succeed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
