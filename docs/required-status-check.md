@@ -145,11 +145,11 @@ Rather than store that token in this repository, approval uses the
 
 Because the PAT is centralized in the server repo, the same server can approve
 PRs for any number of client repositories. **Which** automated PRs get approved
-is controlled by `allowed_committers` in the client workflow (default
-`renovate[bot]` and `dependabot[bot]`); add the committer of another automated
-PR — e.g. the daily profile update — to cover it too. Major Renovate updates are
-still `automerge: false` in `renovate.json`, so they never auto-merge and a human
-merges them manually.
+is defined in `.github/approve-pr.yaml` (not in the workflow) — the workflow
+reads that list and passes it to the action. Add the committer of another
+automated PR — e.g. the daily profile update — to that file to cover it too, no
+workflow change needed. Major Renovate updates are still `automerge: false` in
+`renovate.json`, so they never auto-merge and a human merges them manually.
 
 #### One-time setup
 
@@ -179,3 +179,4 @@ Server repo (`approve-pr-server`):
 | `.github/workflows/workflow_call_lint.yaml` | Reusable workflow holding the actual CI jobs. Add new jobs here. |
 | `.github/renovate.json` | Renovate config; enables auto-merge for dependency PRs. |
 | `.github/workflows/approve-automated-pr.yaml` | Client half of the code-owner auto-approval for automated (bot) PRs. |
+| `.github/approve-pr.yaml` | List of committers whose automated PRs are auto-approved. |

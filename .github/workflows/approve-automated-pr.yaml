@@ -8,9 +8,8 @@ name: Approve automated PRs
 # (approve-pr-server) to approve, and the server validates the PR and approves
 # it with the code owner's PAT, which lives only in that server repo.
 #
-# WHO gets approved is decided by `allowed_committers` (the server also requires
-# every commit to be signed and linked to a GitHub user). Add a committer there
-# to cover more automated PRs (e.g. the daily profile-update PR).
+# WHO gets approved is defined in .github/approve-pr.yaml (not in this file);
+# the server also requires every commit to be signed and linked to a GitHub user.
 #
 # Requires in this repository:
 #   - vars.APPROVE_PR_CLIENT_APP_ID       (client GitHub App, issues:write on the server repo)
@@ -35,12 +34,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Load allowed committers
+        id: config
+        run: |
+          {
+            echo 'allowed_committers<<EOF'
+            yq '.allowed_committers[]' .github/approve-pr.yaml | sed 's/^"\(.*\)"$/\1/'
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
       - uses: csm-actions/approve-pr-action@452271472f121d6d2f8e7a0761488d2fcc29b715 # v0.2.0
         with:
           pull_request_number: ${{ github.event.pull_request.number }}
           app_id: ${{ vars.APPROVE_PR_CLIENT_APP_ID }}
           app_private_key: ${{ secrets.APPROVE_PR_CLIENT_PRIVATE_KEY }}
           server_repository_name: approve-pr-server
-          allowed_committers: |
-            renovate[bot]
-            dependabot[bot]
+          allowed_committers: ${{ steps.config.outputs.allowed_committers }}
