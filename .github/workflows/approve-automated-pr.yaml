@@ -40,10 +40,11 @@ jobs:
 
       - name: Load allowed committers
         id: config
+        # yq is pre-installed on GitHub-hosted runners (mikefarah, raw output).
         run: |
           {
             echo 'allowed_committers<<EOF'
-            yq '.allowed_committers[]' .github/approve-pr.yaml | sed 's/^"\(.*\)"$/\1/'
+            yq '.allowed_committers[]' .github/approve-pr.yaml
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
