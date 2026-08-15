@@ -1,0 +1,44 @@
+name: Approve Renovate PR
+
+# Auto-approves non-major Renovate PRs as the code owner so the required
+# code-owner review (.github/CODEOWNERS) is satisfied and auto-merge can proceed.
+#
+# This is the CLIENT half of the csm-actions/approve-pr-action Client/Server
+# model. It does NOT hold the approving token: it only asks the server
+# repository (approve-pr-server) to approve, and the server validates the PR and
+# approves it with the code owner's PAT which lives only in that server repo.
+#
+# Major updates are excluded (they carry the `major-update` label set in
+# .github/renovate.json) so they keep requiring a manual review.
+#
+# Requires in this repository:
+#   - vars.APPROVE_PR_CLIENT_APP_ID       (client GitHub App, issues:write on the server repo)
+#   - secrets.APPROVE_PR_CLIENT_PRIVATE_KEY
+# See docs/required-status-check.md for the full setup.
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  approve:
+    if: >-
+      github.event.pull_request.user.login == 'renovate[bot]' &&
+      !contains(github.event.pull_request.labels.*.name, 'major-update')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: csm-actions/approve-pr-action@452271472f121d6d2f8e7a0761488d2fcc29b715 # v0.2.0
+        with:
+          pull_request_number: ${{ github.event.pull_request.number }}
+          app_id: ${{ vars.APPROVE_PR_CLIENT_APP_ID }}
+          app_private_key: ${{ secrets.APPROVE_PR_CLIENT_PRIVATE_KEY }}
+          server_repository_name: approve-pr-server

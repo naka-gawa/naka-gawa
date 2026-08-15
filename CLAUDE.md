@@ -24,6 +24,7 @@ The following Secrets are registered in the repository for GitHub Actions to fun
 - `APP_PRIVATE_KEY`: Private key (.pem) of the GitHub App used for creating PRs.
 - `GPG_PRIVATE_KEY`: GPG private key for commit signing.
 - `GPG_PASSPHRASE`: Passphrase for the GPG private key.
+- `APPROVE_PR_CLIENT_PRIVATE_KEY` (secret) / `APPROVE_PR_CLIENT_APP_ID` (variable): Credentials of the **client** GitHub App used by `approve-renovate-pr.yaml` to request approval of non-major Renovate PRs from the `approve-pr-server` repository (`csm-actions/approve-pr-action` Client/Server model). This App only needs `issues: write` on the server repo. The approving PAT is **not** stored in this repository — it lives only in the `approve-pr-server` repo. This keeps the token policy above intact (no broad-scope PAT here). See `docs/required-status-check.md`.
 
 # Directory Structure and Artifacts
 - `.github/workflows/`: Contains the definitions of the automation workflows.
