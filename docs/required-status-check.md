@@ -35,15 +35,19 @@ succeeds only when all of them succeed:
 status-check:
   runs-on: ubuntu-latest
   needs: [lint]
-  if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+  if: always()
   steps:
-    - run: exit 1
+    - name: Fail if any needed job did not succeed
+      if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+      run: exit 1
 ```
 
-- When every needed job succeeds (or is skipped), the `if` condition is `false`,
-  so `status-check` is itself skipped. GitHub treats a **skipped required status
-  check as passing**, so the pull request is mergeable.
-- When any needed job fails or is cancelled, `status-check` runs `exit 1` and
+- The job always runs (`if: always()`) so it reports an explicit **success
+  (green)** check rather than relying on GitHub's "a skipped required check
+  passes" behavior.
+- When every needed job succeeds (or is skipped), the failing step is itself
+  skipped and the job succeeds, so the pull request is mergeable.
+- When any needed job fails or is cancelled, the step runs `exit 1` and the job
   fails, blocking the merge.
 
 Only `status-check` is registered in the branch ruleset. Because it aggregates
