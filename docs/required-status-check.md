@@ -146,13 +146,22 @@ Rather than store that token in this repository, approval uses the
 Because the PAT is centralized in the server repo, the same server can approve
 PRs for any number of client repositories. **Which** automated PRs get approved
 is the single source of truth in the server repo,
-`approve-pr-server/.github/approve-pr.yaml`. The action validates the committer
-on both the client and the server side, so this client workflow **fetches that
-same list from the server repo at runtime** rather than keeping a second copy —
-edit the list in one place. Add the committer of another automated PR — e.g. the
-daily profile update — there to cover it too, no workflow change needed. Major
-Renovate updates are still `automerge: false` in `renovate.json`, so they never
-auto-merge and a human merges them manually.
+`approve-pr-server/.github/approve-pr.yaml`, keyed **per client repository**:
+
+```yaml
+naka-gawa:          # client repository name
+  - renovate[bot]
+  - dependabot[bot]
+  - profile-card-action-apps[bot]
+```
+
+The action validates the committer on both the client and the server side, so
+this client workflow **fetches that file from the server repo at runtime and
+selects this repo's list** (`.[<repo>]`) rather than keeping a second copy — edit
+the list in one place. Add the committer of another automated PR — e.g. the
+daily profile update — under this repo's key to cover it too, no workflow change
+needed. Major Renovate updates are still `automerge: false` in `renovate.json`,
+so they never auto-merge and a human merges them manually.
 
 #### One-time setup
 

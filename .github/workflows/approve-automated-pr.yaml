@@ -49,16 +49,17 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: approve-pr-server
 
-      - name: Load allowed committers from the server repo (single source of truth)
+      - name: Load allowed committers for this repo (single source of truth in the server repo)
         id: config
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ github.event.repository.name }}
         run: |
           {
             echo 'allowed_committers<<EOF'
             gh api "repos/${{ github.repository_owner }}/approve-pr-server/contents/.github/approve-pr.yaml" \
               -H 'Accept: application/vnd.github.raw' \
-              | yq '.allowed_committers[]' -
+              | yq '.[env(REPO)][]' -
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
