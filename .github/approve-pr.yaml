@@ -5,3 +5,4 @@
 allowed_committers:
   - renovate[bot]
   - dependabot[bot]
+  - profile-card-action-apps[bot]
