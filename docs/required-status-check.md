@@ -120,6 +120,57 @@ status check above is configured in the ruleset.
   it opens. Major updates are excluded (`matchUpdateTypes: ["major"]`,
   `automerge: false`) so they are merged manually after review.
 
+### Auto-approving automated PRs
+
+`.github/CODEOWNERS` (`* @naka-gawa`) makes a code-owner review required on
+every PR. A bot (Renovate, or the App that opens the daily profile-update PR)
+cannot approve its own PRs, and — because a GitHub App or `github-actions[bot]`
+cannot be listed as a code owner — neither can satisfy a code-owner review. So
+the approving review has to be submitted **as the code owner** (a token owned by
+`@naka-gawa`).
+
+Rather than store that token in this repository, approval uses the
+[`csm-actions/approve-pr-action`](https://github.com/csm-actions/approve-pr-action)
+**Client/Server model**, so the token never lives in the client repo:
+
+1. **Client** (`.github/workflows/approve-automated-pr.yaml`, this repo): on a
+   bot-authored PR it runs the action in client mode, which asks the server
+   repository to approve by creating an `approve-pr-*` label there. It uses a
+   client GitHub App and never touches the approving token.
+2. **Server** (`approve-pr-server`, a separate private repo): a workflow
+   triggered by that label validates the PR — all commits signed and linked to
+   users, committer in `allowed_committers` — then approves it with the code
+   owner's PAT, which is stored **only** in the server repo (as a protected
+   environment secret).
+
+Because the PAT is centralized in the server repo, the same server can approve
+PRs for any number of client repositories. **Which** automated PRs get approved
+is defined in `.github/approve-pr.yaml` (not in the workflow) — the workflow
+reads that list and passes it to the action. Add the committer of another
+automated PR — e.g. the daily profile update — to that file to cover it too, no
+workflow change needed. Major Renovate updates are still `automerge: false` in
+`renovate.json`, so they never auto-merge and a human merges them manually.
+
+#### One-time setup
+
+Client repo (this repo) — Actions variable/secret:
+
+- `APPROVE_PR_CLIENT_APP_ID` (variable) and `APPROVE_PR_CLIENT_PRIVATE_KEY`
+  (secret): a **client GitHub App** with `issues: write` (to create the label
+  on the server repo), installed on this repo and the server repo, webhook
+  disabled.
+
+Server repo (`approve-pr-server`):
+
+- The server workflow (`label: created` → `csm-actions/approve-pr-action` in
+  server mode).
+- `APPROVE_PR_SERVER_APP_ID` / `APPROVE_PR_SERVER_PRIVATE_KEY`: a **server
+  GitHub App** with `pull requests: read` and `contents: read` on the client
+  repos (to validate PRs).
+- A protected environment secret holding **@naka-gawa's fine-grained PAT**
+  scoped to the client repos with only `pull requests: write`. This is the only
+  place the PAT is stored.
+
 ## Files
 
 | File | Role |
@@ -127,3 +178,5 @@ status check above is configured in the ruleset.
 | `.github/workflows/ci.yaml` | Pull-request entry point; defines the aggregated `status-check` job. |
 | `.github/workflows/workflow_call_lint.yaml` | Reusable workflow holding the actual CI jobs. Add new jobs here. |
 | `.github/renovate.json` | Renovate config; enables auto-merge for dependency PRs. |
+| `.github/workflows/approve-automated-pr.yaml` | Client half of the code-owner auto-approval for automated (bot) PRs. |
+| `.github/approve-pr.yaml` | List of committers whose automated PRs are auto-approved. |
