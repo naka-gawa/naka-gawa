@@ -8,11 +8,14 @@ name: Approve automated PRs
 # (approve-pr-server) to approve, and the server validates the PR and approves
 # it with the code owner's PAT, which lives only in that server repo.
 #
-# WHO gets approved is defined in .github/approve-pr.yaml (not in this file);
-# the server also requires every commit to be signed and linked to a GitHub user.
+# WHO gets approved is the single source of truth in the server repo
+# (approve-pr-server/.github/approve-pr.yaml). The action validates the committer
+# on BOTH sides, so this workflow fetches that same list at runtime instead of
+# keeping a second copy here.
 #
 # Requires in this repository:
-#   - vars.APPROVE_PR_APP_ID       (the shared approver GitHub App, issues:write on the server repo)
+#   - vars.APPROVE_PR_APP_ID       (the shared approver GitHub App: issues:write on
+#                                   the server repo, pull requests/contents:read)
 #   - secrets.APPROVE_PR_PRIVATE_KEY
 # See docs/required-status-check.md for the full setup.
 on:
@@ -30,21 +33,32 @@ permissions:
 
 jobs:
   approve:
-    if: github.event.pull_request.user.type == 'Bot'
+    # Also skip until the approver App is configured (APPROVE_PR_APP_ID unset).
+    if: >-
+      github.event.pull_request.user.type == 'Bot' &&
+      vars.APPROVE_PR_APP_ID != ''
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Generate approver App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          persist-credentials: false
+          app-id: ${{ vars.APPROVE_PR_APP_ID }}
+          private-key: ${{ secrets.APPROVE_PR_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: approve-pr-server
 
-      - name: Load allowed committers
+      - name: Load allowed committers from the server repo (single source of truth)
         id: config
-        # yq is pre-installed on GitHub-hosted runners (mikefarah, raw output).
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           {
             echo 'allowed_committers<<EOF'
-            yq '.allowed_committers[]' .github/approve-pr.yaml
+            gh api "repos/${{ github.repository_owner }}/approve-pr-server/contents/.github/approve-pr.yaml" \
+              -H 'Accept: application/vnd.github.raw' \
+              | yq '.allowed_committers[]' -
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
