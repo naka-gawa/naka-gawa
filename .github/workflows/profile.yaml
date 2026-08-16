@@ -51,6 +51,10 @@ jobs:
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ steps.generate-token.outputs.token }}
+          # Create the commit via the GitHub API so it is signed/verified by
+          # GitHub. Required by the code-owner auto-approval (approve-pr-action
+          # only approves PRs whose commits are all signed).
+          sign-commits: true
           branch: "update-profile-3d-contrib"
           delete-branch: true
           title: "chore: update github profile 3d contrib (${{ env.DATE }})"
