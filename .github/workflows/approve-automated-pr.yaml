@@ -12,8 +12,8 @@ name: Approve automated PRs
 # the server also requires every commit to be signed and linked to a GitHub user.
 #
 # Requires in this repository:
-#   - vars.APPROVE_PR_CLIENT_APP_ID       (client GitHub App, issues:write on the server repo)
-#   - secrets.APPROVE_PR_CLIENT_PRIVATE_KEY
+#   - vars.APPROVE_PR_APP_ID       (the shared approver GitHub App, issues:write on the server repo)
+#   - secrets.APPROVE_PR_PRIVATE_KEY
 # See docs/required-status-check.md for the full setup.
 on:
   pull_request:
@@ -51,7 +51,7 @@ jobs:
       - uses: csm-actions/approve-pr-action@452271472f121d6d2f8e7a0761488d2fcc29b715 # v0.2.0
         with:
           pull_request_number: ${{ github.event.pull_request.number }}
-          app_id: ${{ vars.APPROVE_PR_CLIENT_APP_ID }}
-          app_private_key: ${{ secrets.APPROVE_PR_CLIENT_PRIVATE_KEY }}
+          app_id: ${{ vars.APPROVE_PR_APP_ID }}
+          app_private_key: ${{ secrets.APPROVE_PR_PRIVATE_KEY }}
           server_repository_name: approve-pr-server
           allowed_committers: ${{ steps.config.outputs.allowed_committers }}

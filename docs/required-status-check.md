@@ -153,23 +153,25 @@ workflow change needed. Major Renovate updates are still `automerge: false` in
 
 #### One-time setup
 
+A **single approver GitHub App** (one App per purpose) is shared by the client
+and server workflows: `issues: write` (create the label on the server repo),
+`pull requests: read` and `contents: read` (validate PRs). It has **no**
+`pull requests: write`, so it cannot approve on its own. Install it on this repo
+and the server repo, webhook disabled.
+
 Client repo (this repo) — Actions variable/secret:
 
-- `APPROVE_PR_CLIENT_APP_ID` (variable) and `APPROVE_PR_CLIENT_PRIVATE_KEY`
-  (secret): a **client GitHub App** with `issues: write` (to create the label
-  on the server repo), installed on this repo and the server repo, webhook
-  disabled.
+- `APPROVE_PR_APP_ID` (variable) and `APPROVE_PR_PRIVATE_KEY` (secret): the
+  approver App above.
 
 Server repo (`approve-pr-server`):
 
 - The server workflow (`label: created` → `csm-actions/approve-pr-action` in
   server mode).
-- `APPROVE_PR_SERVER_APP_ID` / `APPROVE_PR_SERVER_PRIVATE_KEY`: a **server
-  GitHub App** with `pull requests: read` and `contents: read` on the client
-  repos (to validate PRs).
+- `APPROVE_PR_APP_ID` / `APPROVE_PR_PRIVATE_KEY`: the same approver App.
 - A protected environment secret holding **@naka-gawa's fine-grained PAT**
   scoped to the client repos with only `pull requests: write`. This is the only
-  place the PAT is stored.
+  place the PAT is stored, and it is what actually submits the approval.
 
 ## Files
 
