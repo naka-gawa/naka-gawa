@@ -1,8 +1,0 @@
-# Committers whose automated PRs are auto-approved as the code owner.
-# Consumed by .github/workflows/approve-automated-pr.yaml.
-# Add a committer here to cover another automated PR (e.g. the daily
-# profile-update PR) — no workflow change needed.
-allowed_committers:
-  - renovate[bot]
-  - dependabot[bot]
-  - profile-card-action-apps[bot]

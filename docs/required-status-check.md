@@ -145,11 +145,23 @@ Rather than store that token in this repository, approval uses the
 
 Because the PAT is centralized in the server repo, the same server can approve
 PRs for any number of client repositories. **Which** automated PRs get approved
-is defined in `.github/approve-pr.yaml` (not in the workflow) — the workflow
-reads that list and passes it to the action. Add the committer of another
-automated PR — e.g. the daily profile update — to that file to cover it too, no
-workflow change needed. Major Renovate updates are still `automerge: false` in
-`renovate.json`, so they never auto-merge and a human merges them manually.
+is the single source of truth in the server repo,
+`approve-pr-server/.github/approve-pr.yaml`, keyed **per client repository**:
+
+```yaml
+naka-gawa:          # client repository name
+  - renovate[bot]
+  - dependabot[bot]
+  - profile-card-action-apps[bot]
+```
+
+The action validates the committer on both the client and the server side, so
+this client workflow **fetches that file from the server repo at runtime and
+selects this repo's list** (`.[<repo>]`) rather than keeping a second copy — edit
+the list in one place. Add the committer of another automated PR — e.g. the
+daily profile update — under this repo's key to cover it too, no workflow change
+needed. Major Renovate updates are still `automerge: false` in `renovate.json`,
+so they never auto-merge and a human merges them manually.
 
 #### One-time setup
 
@@ -180,5 +192,4 @@ Server repo (`approve-pr-server`):
 | `.github/workflows/ci.yaml` | Pull-request entry point; defines the aggregated `status-check` job. |
 | `.github/workflows/workflow_call_lint.yaml` | Reusable workflow holding the actual CI jobs. Add new jobs here. |
 | `.github/renovate.json` | Renovate config; enables auto-merge for dependency PRs. |
-| `.github/workflows/approve-automated-pr.yaml` | Client half of the code-owner auto-approval for automated (bot) PRs. |
-| `.github/approve-pr.yaml` | List of committers whose automated PRs are auto-approved. |
+| `.github/workflows/approve-automated-pr.yaml` | Client half of the code-owner auto-approval; fetches the allowed-committers list from the server repo at runtime. |
