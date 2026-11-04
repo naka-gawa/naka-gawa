@@ -17,7 +17,7 @@ name: Approve automated PRs
 #   - vars.APPROVE_PR_APP_ID       (the shared approver GitHub App: issues:write on
 #                                   the server repo, pull requests/contents:read)
 #   - secrets.APPROVE_PR_PRIVATE_KEY
-# See docs/required-status-check.md for the full setup.
+# See approve-pr-server/README.md and its onboard-client-repo skill for setup.
 on:
   pull_request:
     branches:
@@ -48,6 +48,10 @@ jobs:
           private-key: ${{ secrets.APPROVE_PR_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: approve-pr-server
+          # This token only reads .github/approve-pr.yaml from the server repo,
+          # so scope it to contents:read instead of inheriting the App
+          # installation's full permissions.
+          permission-contents: read
 
       - name: Load allowed committers for this repo (single source of truth in the server repo)
         id: config
