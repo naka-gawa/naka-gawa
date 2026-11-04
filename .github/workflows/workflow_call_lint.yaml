@@ -40,7 +40,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: suzuki-shunsuke/pinact-action@2a42f29b3397967439ed46e7650f3045f49699f9 # v3.0.1
+      - uses: suzuki-shunsuke/pinact-action@90feb810d88e342b510dffc2c458acfc6e661d90 # v3.1.0
         with:
           app_id: ${{ secrets.APP_ID }}
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
